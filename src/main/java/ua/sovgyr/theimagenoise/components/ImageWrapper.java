@@ -29,10 +29,6 @@ public class ImageWrapper implements ImageEditor {
         writer = dest.getPixelWriter();
     }
 
-    public Image getWritableImage() {
-        return dest;
-    }
-
     @Override
     public int getWidth() {
         return width;
@@ -49,5 +45,10 @@ public class ImageWrapper implements ImageEditor {
         Color writingColor = originColor.invert();
 
         writer.setColor(x, y, writingColor);
+    }
+
+    @Override
+    public Image getResult() {
+        return dest;
     }
 }

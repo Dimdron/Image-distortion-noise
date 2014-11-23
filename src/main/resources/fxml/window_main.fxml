@@ -12,30 +12,33 @@
 
           <Menu mnemonicParsing="false" text="File">
             <items>
-                <MenuItem mnemonicParsing="false" onAction="#openImage" text="Open" fx:id="miOpen"/>
-                <MenuItem mnemonicParsing="false" onAction="#onExecute" text="Execute" fx:id="miExecute"/>
-                <MenuItem mnemonicParsing="false" onAction="#onClose" text="Close" fx:id="miClose"/>
+                <MenuItem fx:id="miOpen" mnemonicParsing="false" onAction="#openImage" text="Open" />
+                <MenuItem fx:id="miExecute" mnemonicParsing="false" onAction="#onExecute" text="Execute" />
+                <MenuItem fx:id="miClose" mnemonicParsing="false" onAction="#onClose" text="Close" />
             </items>
           </Menu>
 
         </menus>
       </MenuBar>
    </top>
-
-   <bottom>
-      <ProgressBar prefWidth="200.0" progress="0.0"
-                   BorderPane.alignment="CENTER" fx:id="progressBar"/>
-   </bottom>
    <left>
-      <ImageView fitHeight="150.0" fitWidth="252.0" fx:id="ivSource"
-                 pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
+      <ImageView fx:id="ivSource" fitHeight="150.0" fitWidth="252.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
    </left>
    <right>
-      <ImageView fitHeight="150.0" fitWidth="275.0" fx:id="ivDestination"
-                 pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
+      <ImageView fx:id="ivDestination" fitHeight="150.0" fitWidth="275.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
    </right>
    <center>
-      <Button fx:id="btnExecute" mnemonicParsing="false"
-              onAction="#onExecute" prefHeight="25.0" prefWidth="91.0" text="Execute =&gt;" BorderPane.alignment="CENTER" />
+      <Button fx:id="btnExecute" mnemonicParsing="false" onAction="#onExecute" prefHeight="25.0" prefWidth="91.0" text="Execute =&gt;" BorderPane.alignment="CENTER" />
    </center>
+   <bottom>
+      <AnchorPane prefHeight="24.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+         <children>
+            <ProgressBar layoutX="6.0" layoutY="2.0" prefWidth="200.0" progress="0.0"
+                         AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="10.0"
+                         AnchorPane.topAnchor="2.0" fx:id="progressBar"/>
+            <Label fx:id="label" layoutX="557.0" layoutY="5.0" AnchorPane.bottomAnchor="2.0"
+                   AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="2.0" />
+         </children>
+      </AnchorPane>
+   </bottom>
 </BorderPane>

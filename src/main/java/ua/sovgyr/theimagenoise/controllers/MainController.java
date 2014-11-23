@@ -1,21 +1,17 @@
 package ua.sovgyr.theimagenoise.controllers;
 
+import javafx.concurrent.Service;
+import javafx.concurrent.Worker;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressBar;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import ua.sovgyr.theimagenoise.components.BaseContext;
-import ua.sovgyr.theimagenoise.components.ImageEditor;
-import ua.sovgyr.theimagenoise.components.ImageWrapper;
-import ua.sovgyr.theimagenoise.components.listeners.OnEditCancelListener;
-import ua.sovgyr.theimagenoise.components.listeners.OnFinishListener;
 
 import java.io.File;
 import java.net.URL;
@@ -25,8 +21,7 @@ import java.util.ResourceBundle;
 /**
  * Created by dimdron on 18.11.14.
  */
-public class MainController implements Initializable,
-        OnEditCancelListener, OnFinishListener, BaseContext.OnImageLoaded {
+public class MainController implements Initializable, BaseContext.OnImageLoaded, EventHandler<WorkerStateEvent> {
     private BaseContext context = new BaseContext();
     @FXML private MenuBar menuBar;
     @FXML private MenuItem miClose;
@@ -36,6 +31,8 @@ public class MainController implements Initializable,
     @FXML private ImageView ivDestination;
     @FXML private Button btnExecute;
     @FXML private ProgressBar progressBar;
+    @FXML private Label label;
+    private Service<Image> service;
 
     public void openImage(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
@@ -47,7 +44,16 @@ public class MainController implements Initializable,
     }
 
     public void onExecute(ActionEvent actionEvent) {
-        context.imposeNoise(0);
+        service = context.execute();
+        service.setOnCancelled(this);
+        service.setOnSucceeded(this);
+        service.setOnFailed(this);
+        btnExecute.disableProperty().bind(service.runningProperty());
+        progressBar.visibleProperty().bind(service.runningProperty());
+        progressBar.progressProperty().bind(service.progressProperty());
+        label.textProperty().bind(service.messageProperty());
+
+        service.start();
     }
 
     public void onClose(ActionEvent actionEvent) {
@@ -57,22 +63,10 @@ public class MainController implements Initializable,
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         miExecute.setDisable(true);
+        progressBar.setVisible(false);
         btnExecute.setDisable(true);
         btnExecute.setDefaultButton(true);
-        context.setProcessFinishedListener(this);
-        context.setProcessCanceled(this);
         context.getOnImageLoadedListeners().add(this);
-    }
-
-    @Override
-    public void onCanceled(ImageEditor editor, int processId) {
-
-    }
-
-    @Override
-    public void onFinish(ImageEditor editor, int processId) {
-        ImageWrapper wrapper = (ImageWrapper)editor;
-        ivDestination.setImage(wrapper.getWritableImage());
     }
 
     @Override
@@ -82,5 +76,20 @@ public class MainController implements Initializable,
         miExecute.setDisable(false);
     }
 
-
+    @Override
+    public void handle(WorkerStateEvent event) {
+        switch (event.getSource().getState()) {
+            case CANCELLED:
+                break;
+            case SUCCEEDED:
+                ivDestination.setImage((Image)event.getSource().getValue());
+                break;
+            case FAILED:
+                break;
+        }
+        btnExecute.disableProperty().unbind();
+        progressBar.progressProperty().unbind();
+        label.textProperty().unbind();
+        progressBar.visibleProperty().unbind();
+    }
 }
