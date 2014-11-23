@@ -6,5 +6,5 @@ package ua.sovgyr.theimagenoise.components;
 public interface ImageEditor {
     public int getWidth();
     public int getHeight();
-    public void setOpposite(int x, int y);
+    public void invert(int x, int y);
 }

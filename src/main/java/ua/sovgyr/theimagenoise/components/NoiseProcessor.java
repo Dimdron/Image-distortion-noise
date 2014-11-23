@@ -1,43 +1,83 @@
 package ua.sovgyr.theimagenoise.components;
 
+import javafx.application.Platform;
+import org.jetbrains.annotations.NotNull;
+import ua.sovgyr.theimagenoise.components.listeners.OnEditCancelListener;
+import ua.sovgyr.theimagenoise.components.listeners.OnFinishListener;
+
 import java.util.Random;
 
-/**
- * Created by dimdron on 20.11.14.
- */
-public class NoiseProcessor implements Runnable{
+public class NoiseProcessor {
     private int distortion = 10;
-    private boolean process = false;
-    private boolean stop = false;
+    private int range = 50;
 
-    private ImageEditor editor;
-    private Random random = new Random();
     private OnFinishListener onFinishListener;
-    private Thread backgroundThread;
+    private OnEditCancelListener onEditCancelListener;
 
     public int getDistortion() {
         return distortion;
-    }
-
-    public boolean isProcess() {
-        return process;
     }
 
     public void setOnFinishListener(OnFinishListener onFinishListener) {
         this.onFinishListener = onFinishListener;
     }
 
-    public void execute(ImageEditor editor) {
-        this.editor = editor;
-        backgroundThread = new Thread(this);
+    public Cancelable execute(@NotNull ImageEditor editor, @NotNull int processId) {
+        EditorProcess process = new EditorProcess(editor, processId);
+        Thread backgroundThread = new Thread(process);
+        backgroundThread.start();
+        return process;
     }
 
-    @Override
-    public void run() {
-        // TODO
+    public void setOnEditCancelListener(OnEditCancelListener onEditCancelListener) {
+        this.onEditCancelListener = onEditCancelListener;
     }
 
-    public static interface OnFinishListener {
-        public void onFinish(ImageEditor editor);
+    protected class EditorProcess implements Runnable, Cancelable {
+        private Random random = new Random();
+        private int process_id;
+        private ImageEditor editor;
+        private boolean stop = false;
+        private boolean finished;
+
+        public EditorProcess(ImageEditor editor, int process_id) {
+            this.editor = editor;
+            this.process_id = process_id;
+        }
+
+        @Override
+        public void run() {
+            int width = editor.getWidth();
+            int height = editor.getHeight();
+
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    if (stop) {
+                        onEditCancelListener.onCanceled(editor, process_id);
+                        return;
+                    }
+                    int randomValue = random.nextInt(range);
+                    if (distortion > randomValue)
+                        editor.invert(x, y);
+                }
+            }
+            finished = true;
+            Platform.runLater(()->onFinishListener.onFinish(editor, process_id));
+        }
+
+        @Override
+        public void cancel() {
+            stop = true;
+        }
+
+        @Override
+        public boolean isCanceled() {
+            return stop;
+        }
+
+        @Override
+        public boolean isFinished() {
+            return finished;
+        }
     }
 }
