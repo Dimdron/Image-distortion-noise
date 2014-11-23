@@ -9,13 +9,17 @@ import java.util.Random;
 
 public class NoiseProcessor {
     private int distortion = 10;
-    private int range = 50;
+    private static final int RANGE = 50;
 
     private OnFinishListener onFinishListener;
     private OnEditCancelListener onEditCancelListener;
 
     public int getDistortion() {
         return distortion;
+    }
+
+    public void setDistortion(int distortion) {
+        this.distortion = distortion;
     }
 
     public void setOnFinishListener(OnFinishListener onFinishListener) {
@@ -56,7 +60,7 @@ public class NoiseProcessor {
                         onEditCancelListener.onCanceled(editor, process_id);
                         return;
                     }
-                    int randomValue = random.nextInt(range);
+                    int randomValue = random.nextInt(RANGE);
                     if (distortion > randomValue)
                         editor.invert(x, y);
                 }
